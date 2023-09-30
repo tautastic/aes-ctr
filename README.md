@@ -37,3 +37,7 @@ So my next goals are:
 - [ ] Reach `0.23 cycles/byte`, as `0.23 < 0.24`.
 - [ ] Write a new and improved whitepaper.
 - [ ] Win the Nobel Prize.
+
+## Disclaimer
+
+This implementation is intended for academic purposes only and **should not be used in a production environment**.
