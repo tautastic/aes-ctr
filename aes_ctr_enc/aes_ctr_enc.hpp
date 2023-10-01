@@ -19,7 +19,13 @@ private:
 public:
     AES_CTR(const __m128i& key, __m128i& iv, __m128i& firstBlock);
 
-    void encryptChunk(__m128i* plaintextChunk);
+    void encrypt4Blocks(__m128i* plaintextChunk);
+
+    void encrypt3Blocks(__m128i* plaintextChunk);
+
+    void encrypt2Blocks(__m128i* plaintextChunk);
+
+    void encrypt1Block(__m128i* plaintextChunk);
 };
 
 #endif

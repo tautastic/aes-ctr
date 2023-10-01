@@ -51,69 +51,178 @@ void AES_CTR::encryptFirst(__m128i& firstBlock) {
     this->counter = _mm_shuffle_epi8(this->counter, _mm_set_epi32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f));
 }
 
+void AES_CTR::encrypt4Blocks(__m128i* plaintextChunk) {
+    __m128i shuffle_mask = _mm_set_epi32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
 
-void AES_CTR::encryptChunk(__m128i* plaintextChunk) {
-    for (std::size_t i = 0; i < 32; i += 4) {
-        __m128i temp1 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi32(this->counter, _mm_set_epi32(0, 0, 0, 0)), _mm_set_epi32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f)), this->roundKeys[0]);
-        __m128i temp2 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi32(this->counter, _mm_set_epi32(0, 0, 0, 1)), _mm_set_epi32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f)), this->roundKeys[0]);
-        __m128i temp3 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi32(this->counter, _mm_set_epi32(0, 0, 0, 2)), _mm_set_epi32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f)), this->roundKeys[0]);
-        __m128i temp4 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi32(this->counter, _mm_set_epi32(0, 0, 0, 2)), _mm_set_epi32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f)), this->roundKeys[0]);
-        // Increment the counter by 4 (batch increment)
-        this->counter = _mm_add_epi32(this->counter, _mm_set_epi32(4, 3, 2, 1));
+    __m128i temp1 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 1)), shuffle_mask), this->roundKeys[0]);
+    __m128i temp2 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 2)), shuffle_mask), this->roundKeys[0]);
+    __m128i temp3 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 3)), shuffle_mask), this->roundKeys[0]);
+    this->counter = _mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 4));
+    __m128i temp4 = _mm_xor_si128(_mm_shuffle_epi8(this->counter, shuffle_mask), this->roundKeys[0]);
 
-        temp1 = _mm_aesenc_si128(temp1, this->roundKeys[1]);
-        temp2 = _mm_aesenc_si128(temp2, this->roundKeys[1]);
-        temp3 = _mm_aesenc_si128(temp3, this->roundKeys[1]);
-        temp4 = _mm_aesenc_si128(temp4, this->roundKeys[1]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[1]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[1]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[1]);
+    temp4 = _mm_aesenc_si128(temp4, this->roundKeys[1]);
 
-        temp1 = _mm_aesenc_si128(temp1, this->roundKeys[2]);
-        temp2 = _mm_aesenc_si128(temp2, this->roundKeys[2]);
-        temp3 = _mm_aesenc_si128(temp3, this->roundKeys[2]);
-        temp4 = _mm_aesenc_si128(temp4, this->roundKeys[2]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[2]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[2]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[2]);
+    temp4 = _mm_aesenc_si128(temp4, this->roundKeys[2]);
 
-        temp1 = _mm_aesenc_si128(temp1, this->roundKeys[3]);
-        temp2 = _mm_aesenc_si128(temp2, this->roundKeys[3]);
-        temp3 = _mm_aesenc_si128(temp3, this->roundKeys[3]);
-        temp4 = _mm_aesenc_si128(temp4, this->roundKeys[3]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[3]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[3]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[3]);
+    temp4 = _mm_aesenc_si128(temp4, this->roundKeys[3]);
 
-        temp1 = _mm_aesenc_si128(temp1, this->roundKeys[4]);
-        temp2 = _mm_aesenc_si128(temp2, this->roundKeys[4]);
-        temp3 = _mm_aesenc_si128(temp3, this->roundKeys[4]);
-        temp4 = _mm_aesenc_si128(temp4, this->roundKeys[4]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[4]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[4]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[4]);
+    temp4 = _mm_aesenc_si128(temp4, this->roundKeys[4]);
 
-        temp1 = _mm_aesenc_si128(temp1, this->roundKeys[5]);
-        temp2 = _mm_aesenc_si128(temp2, this->roundKeys[5]);
-        temp3 = _mm_aesenc_si128(temp3, this->roundKeys[5]);
-        temp4 = _mm_aesenc_si128(temp4, this->roundKeys[5]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[5]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[5]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[5]);
+    temp4 = _mm_aesenc_si128(temp4, this->roundKeys[5]);
 
-        temp1 = _mm_aesenc_si128(temp1, this->roundKeys[6]);
-        temp2 = _mm_aesenc_si128(temp2, this->roundKeys[6]);
-        temp3 = _mm_aesenc_si128(temp3, this->roundKeys[6]);
-        temp4 = _mm_aesenc_si128(temp4, this->roundKeys[6]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[6]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[6]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[6]);
+    temp4 = _mm_aesenc_si128(temp4, this->roundKeys[6]);
 
-        temp1 = _mm_aesenc_si128(temp1, this->roundKeys[7]);
-        temp2 = _mm_aesenc_si128(temp2, this->roundKeys[7]);
-        temp3 = _mm_aesenc_si128(temp3, this->roundKeys[7]);
-        temp4 = _mm_aesenc_si128(temp4, this->roundKeys[7]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[7]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[7]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[7]);
+    temp4 = _mm_aesenc_si128(temp4, this->roundKeys[7]);
 
-        temp1 = _mm_aesenc_si128(temp1, this->roundKeys[8]);
-        temp2 = _mm_aesenc_si128(temp2, this->roundKeys[8]);
-        temp3 = _mm_aesenc_si128(temp3, this->roundKeys[8]);
-        temp4 = _mm_aesenc_si128(temp4, this->roundKeys[8]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[8]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[8]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[8]);
+    temp4 = _mm_aesenc_si128(temp4, this->roundKeys[8]);
 
-        temp1 = _mm_aesenc_si128(temp1, this->roundKeys[9]);
-        temp2 = _mm_aesenc_si128(temp2, this->roundKeys[9]);
-        temp3 = _mm_aesenc_si128(temp3, this->roundKeys[9]);
-        temp4 = _mm_aesenc_si128(temp4, this->roundKeys[9]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[9]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[9]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[9]);
+    temp4 = _mm_aesenc_si128(temp4, this->roundKeys[9]);
 
-        temp1 = _mm_aesenclast_si128(temp1, this->roundKeys[10]);
-        temp2 = _mm_aesenclast_si128(temp2, this->roundKeys[10]);
-        temp3 = _mm_aesenclast_si128(temp3, this->roundKeys[10]);
-        temp4 = _mm_aesenclast_si128(temp4, this->roundKeys[10]);
+    temp1 = _mm_aesenclast_si128(temp1, this->roundKeys[10]);
+    temp2 = _mm_aesenclast_si128(temp2, this->roundKeys[10]);
+    temp3 = _mm_aesenclast_si128(temp3, this->roundKeys[10]);
+    temp4 = _mm_aesenclast_si128(temp4, this->roundKeys[10]);
 
-        plaintextChunk[i] ^= temp1;
-        plaintextChunk[i + 1] ^= temp2;
-        plaintextChunk[i + 2] ^= temp3;
-        plaintextChunk[i + 3] ^= temp4;
-    }
+    plaintextChunk[0] ^= temp1;
+    plaintextChunk[1] ^= temp2;
+    plaintextChunk[2] ^= temp3;
+    plaintextChunk[3] ^= temp4;
+}
+
+void AES_CTR::encrypt3Blocks(__m128i* plaintextChunk) {
+    __m128i shuffle_mask = _mm_set_epi32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
+
+    __m128i temp1 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 1)), shuffle_mask), this->roundKeys[0]);
+    __m128i temp2 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 2)), shuffle_mask), this->roundKeys[0]);
+    this->counter = _mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 3));
+    __m128i temp3 = _mm_xor_si128(_mm_shuffle_epi8(this->counter, shuffle_mask), this->roundKeys[0]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[1]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[1]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[1]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[2]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[2]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[2]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[3]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[3]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[3]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[4]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[4]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[4]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[5]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[5]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[5]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[6]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[6]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[6]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[7]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[7]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[7]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[8]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[8]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[8]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[9]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[9]);
+    temp3 = _mm_aesenc_si128(temp3, this->roundKeys[9]);
+
+    temp1 = _mm_aesenclast_si128(temp1, this->roundKeys[10]);
+    temp2 = _mm_aesenclast_si128(temp2, this->roundKeys[10]);
+    temp3 = _mm_aesenclast_si128(temp3, this->roundKeys[10]);
+
+    plaintextChunk[0] ^= temp1;
+    plaintextChunk[1] ^= temp2;
+    plaintextChunk[2] ^= temp3;
+}
+
+void AES_CTR::encrypt2Blocks(__m128i* plaintextChunk) {
+    __m128i shuffle_mask = _mm_set_epi32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
+
+    __m128i temp1 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 1)), shuffle_mask), this->roundKeys[0]);
+    this->counter = _mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 2));
+    __m128i temp2 = _mm_xor_si128(_mm_shuffle_epi8(this->counter, shuffle_mask), this->roundKeys[0]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[1]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[1]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[2]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[2]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[3]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[3]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[4]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[4]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[5]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[5]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[6]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[6]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[7]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[7]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[8]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[8]);
+
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[9]);
+    temp2 = _mm_aesenc_si128(temp2, this->roundKeys[9]);
+
+    temp1 = _mm_aesenclast_si128(temp1, this->roundKeys[10]);
+    temp2 = _mm_aesenclast_si128(temp2, this->roundKeys[10]);
+
+    plaintextChunk[0] ^= temp1;
+    plaintextChunk[1] ^= temp2;
+}
+
+void AES_CTR::encrypt1Block(__m128i* plaintextChunk) {
+    __m128i shuffle_mask = _mm_set_epi32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
+    this->counter = _mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 1));
+    __m128i temp1 = _mm_xor_si128(_mm_shuffle_epi8(this->counter, shuffle_mask), this->roundKeys[0]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[1]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[2]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[3]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[4]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[5]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[6]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[7]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[8]);
+    temp1 = _mm_aesenc_si128(temp1, this->roundKeys[9]);
+    temp1 = _mm_aesenclast_si128(temp1, this->roundKeys[10]);
+    plaintextChunk[0] ^= temp1;
 }
