@@ -1,12 +1,12 @@
-#include "aes_ctr_enc.hpp"
+#include "aes_128_ctr_enc.hpp"
 
-AES_CTR::AES_CTR(const __m128i& key, __m128i& iv, __m128i& firstBlock) {
+AES_128_CTR_ENC::AES_128_CTR_ENC(const __m128i& key, __m128i& iv, __m128i& firstBlock) {
     this->counter = iv;
     this->roundKeys[0] = key;
     this->encryptFirst(firstBlock);
 }
 
-__m128i AES_CTR::expandKey(__m128i key, __m128i generatedKey) {
+__m128i AES_128_CTR_ENC::expandKey(__m128i key, __m128i generatedKey) {
     generatedKey = _mm_shuffle_epi32(generatedKey, _MM_SHUFFLE(3, 3, 3, 3));
     key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
     key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
@@ -14,7 +14,7 @@ __m128i AES_CTR::expandKey(__m128i key, __m128i generatedKey) {
     return _mm_xor_si128(key, generatedKey);
 }
 
-void AES_CTR::encryptFirst(__m128i& firstBlock) {
+void AES_128_CTR_ENC::encryptFirst(__m128i& firstBlock) {
     __m128i temp = _mm_xor_si128(this->counter, this->roundKeys[0]);
 
     this->roundKeys[1] = expandKey(this->roundKeys[0], _mm_aeskeygenassist_si128(this->roundKeys[0], 0x01));
@@ -51,7 +51,7 @@ void AES_CTR::encryptFirst(__m128i& firstBlock) {
     this->counter = _mm_shuffle_epi8(this->counter, _mm_set_epi32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f));
 }
 
-void AES_CTR::encrypt8Blocks(__m128i plaintextChunk[8]) {
+void AES_128_CTR_ENC::encrypt8Blocks(__m128i plaintextChunk[8]) {
     __m128i shuffle_mask = _mm_set_epi32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
     __m128i temp1 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 1)), shuffle_mask), this->roundKeys[0]);
     __m128i temp2 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 2)), shuffle_mask), this->roundKeys[0]);
@@ -163,7 +163,7 @@ void AES_CTR::encrypt8Blocks(__m128i plaintextChunk[8]) {
     plaintextChunk[7] ^= temp8;
 }
 
-void AES_CTR::encrypt4Blocks(__m128i plaintextChunk[4]) {
+void AES_128_CTR_ENC::encrypt4Blocks(__m128i plaintextChunk[4]) {
     __m128i shuffle_mask = _mm_set_epi32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
     __m128i temp1 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 1)), shuffle_mask), this->roundKeys[0]);
     __m128i temp2 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 2)), shuffle_mask), this->roundKeys[0]);
@@ -218,7 +218,7 @@ void AES_CTR::encrypt4Blocks(__m128i plaintextChunk[4]) {
     plaintextChunk[3] ^= temp4;
 }
 
-void AES_CTR::encrypt2Blocks(__m128i plaintextChunk[2]) {
+void AES_128_CTR_ENC::encrypt2Blocks(__m128i plaintextChunk[2]) {
     __m128i shuffle_mask = _mm_set_epi32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
     __m128i temp1 = _mm_xor_si128(_mm_shuffle_epi8(_mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 1)), shuffle_mask), this->roundKeys[0]);
     this->counter = _mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 2));
@@ -249,7 +249,7 @@ void AES_CTR::encrypt2Blocks(__m128i plaintextChunk[2]) {
     plaintextChunk[1] ^= temp2;
 }
 
-void AES_CTR::encrypt1Block(__m128i* plaintextChunk) {
+void AES_128_CTR_ENC::encrypt1Block(__m128i* plaintextChunk) {
     __m128i shuffle_mask = _mm_set_epi32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
     this->counter = _mm_add_epi64(this->counter, _mm_set_epi32(0, 0, 0, 1));
     __m128i temp1 = _mm_xor_si128(_mm_shuffle_epi8(this->counter, shuffle_mask), this->roundKeys[0]);
