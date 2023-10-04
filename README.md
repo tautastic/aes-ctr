@@ -4,7 +4,7 @@ AES-CTR implementation using AES-NI intrinsics and SIMD operations.
 ## Motivation
 After reading [Understanding Cryptography, A Textbook for Students and Practitioners](https://www.crypto-textbook.com) by Christof Paar and Jan Pelzl, I tried to implement AES in C++. At the end of Chapter 4, the book says that it is possible to implement AES in such a way that it requires fewer than 4 CPU cycles to encrypt a byte. So, I gave it a shot.
 
-## Performance
+## Performance (with I/O)
 
 Below is the tabulated percentual differences between `openssl` and `tautastic/aes-ctr`:
 
