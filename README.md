@@ -10,11 +10,11 @@ Below is the tabulated percentual differences between `openssl` and `tautastic/a
 
 | Metric                  | openssl Value       | tautastic/aes-ctr Value | Percentual Difference |
 |-------------------------|---------------------|-------------------------|-----------------------|
-| CPU Utilization         | 0.413               | 0.999                   | -57.83%               |
+| CPU Utilization         | 0.413               | 0.999                   | +141.89%              |
 | Cycles                  | 2,183,036,314       | 932,415,861             | -57.29%               |
 | Instructions            | 2,544,915,007       | 1,014,823,687           | -60.11%               |
 | Cycles per Byte         | 5.4576              | 2.3310                  | -57.29%               |
-| Throughput in GB/s      | 0.325               | 0.712                   | +119.21%              |
+| Throughput in GB/s      | 0.325               | 0.712                   | +119.08%              |
 
 > **Note:** The comparison is done to illustrate the performance characteristics of `tautastic/aes-ctr` relative to `openssl`. Both libraries have their own set of features and optimizations which may suit different use cases.
 
